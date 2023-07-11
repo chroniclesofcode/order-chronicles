@@ -9,7 +9,8 @@
 #include "Order.h"
 
 /*
-    Orderbook using a map (tree) + doubly linked lists
+    Orderbook using a map (tree) + doubly linked lists.
+    Matching engine uses price-time priority.
 */
 class Orderbook {
 public:
@@ -18,12 +19,12 @@ public:
         bid_tot = 0;
     }
 
-    void addOrder(Order o) {
+    int addOrder(Order o) {
         if (o.direction) {
             std::list<order_t> &order_q = bids[o.price];
             order_q.push_back({ o.quantity, o.id });
             orders[o.id] = std::prev(order_q.end());
-            dirs[o.id] = 1;
+            info[o.id] = { o.price, 1 };
 
             bid_vol[o.price] += o.quantity;
             bid_tot += o.quantity;
@@ -31,25 +32,32 @@ public:
             std::list<order_t> &order_q = asks[o.price];
             order_q.push_back({ o.quantity, o.id });
             orders[o.id] = std::prev(order_q.end());
-            dirs[o.id] = 1;
+            info[o.id] = { o.price, 0};
 
             ask_vol[o.price] += o.quantity;
             ask_tot += o.quantity;
         }
+        return o.id;
     }
 
     void cancelOrder(int orderid) {
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
-        int o_price = (*it)[0];
-        int o_quantity = (*it)[1];
-        int o_direction = dirs[orderid];
+        int o_price = info[orderid][0];
+        int o_quantity = (*it)[0];
+        int o_direction = info[orderid][1];
+        std::cout << "price: " << o_price << " quantity: " << o_quantity << " dir: " << o_direction << std::endl;
         if (o_direction) {
             std::list<order_t> &order_q = bids[o_price];
 
             order_q.erase(it);
             orders.erase(orderid);
-            //dirs.erase(orderid);
+            //info.erase(orderid);
+
+            // Delete key if all orders erased
+            if (order_q.empty()) {
+                bids.erase(o_price);
+            }
 
             bid_vol[o_price] -= o_quantity;
             bid_tot -= o_quantity;
@@ -58,7 +66,12 @@ public:
 
             order_q.erase(it);
             orders.erase(orderid);
-            //dirs.erase(orderid);
+            //info.erase(orderid);
+
+            // Delete key if all orders erased
+            if (order_q.empty()) {
+                asks.erase(o_price);
+            }
 
             ask_vol[o_price] -= o_quantity;
             ask_tot -= o_quantity;
@@ -67,12 +80,12 @@ public:
 
     int highestBid() {
         if (bids.empty()) return -1;
-        return (*bids.begin()).first;
+        return (bids.begin())->first;
     }
 
     int lowestAsk() {
         if (asks.empty()) return -1;
-        return (*asks.begin()).first;
+        return (asks.begin())->first;
     }
 
     // 1 is bid, 0 is asks
@@ -104,7 +117,7 @@ private:
     std::unordered_map<int, int> bid_vol;
 
     std::unordered_map<int, std::list<order_t>::iterator> orders;
-    std::unordered_map<int, int> dirs;
+    std::unordered_map<int, order_t> info;
     int ask_tot;
     int bid_tot;
 };
