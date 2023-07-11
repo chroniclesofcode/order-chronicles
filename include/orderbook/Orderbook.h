@@ -22,17 +22,15 @@ public:
     int addOrder(Order o) {
         if (o.direction) {
             std::list<order_t> &order_q = bids[o.price];
-            order_q.push_back({ o.quantity, o.id });
+            order_q.push_back(o);
             orders[o.id] = std::prev(order_q.end());
-            info[o.id] = { o.price, 1 };
 
             bid_vol[o.price] += o.quantity;
             bid_tot += o.quantity;
         } else {
             std::list<order_t> &order_q = asks[o.price];
-            order_q.push_back({ o.quantity, o.id });
+            order_q.push_back(o);
             orders[o.id] = std::prev(order_q.end());
-            info[o.id] = { o.price, 0};
 
             ask_vol[o.price] += o.quantity;
             ask_tot += o.quantity;
@@ -43,12 +41,9 @@ public:
     void cancelOrder(int orderid) {
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
-        int o_price = info[orderid][0];
-        int o_quantity = (*it)[0];
-        int o_direction = info[orderid][1];
-        std::cout << "price: " << o_price << " quantity: " << o_quantity << " dir: " << o_direction << std::endl;
-        if (o_direction) {
-            std::list<order_t> &order_q = bids[o_price];
+        Order &o = *it;
+        if (o.direction) {
+            std::list<order_t> &order_q = bids[o.price];
 
             order_q.erase(it);
             orders.erase(orderid);
@@ -56,13 +51,13 @@ public:
 
             // Delete key if all orders erased
             if (order_q.empty()) {
-                bids.erase(o_price);
+                bids.erase(o.price);
             }
 
-            bid_vol[o_price] -= o_quantity;
-            bid_tot -= o_quantity;
+            bid_vol[o.price] -= o.quantity;
+            bid_tot -= o.quantity;
         } else {
-            std::list<order_t> &order_q = asks[o_price];
+            std::list<order_t> &order_q = asks[o.price];
 
             order_q.erase(it);
             orders.erase(orderid);
@@ -70,11 +65,11 @@ public:
 
             // Delete key if all orders erased
             if (order_q.empty()) {
-                asks.erase(o_price);
+                asks.erase(o.price);
             }
 
-            ask_vol[o_price] -= o_quantity;
-            ask_tot -= o_quantity;
+            ask_vol[o.price] -= o.quantity;
+            ask_tot -= o.quantity;
         }
     }
 
@@ -110,14 +105,13 @@ public:
     }
 
 private:
-    typedef std::array<int, 2> order_t;
+    typedef Order order_t;
     std::map<int, std::list<order_t>, std::greater<int>> bids;
     std::map<int, std::list<order_t>> asks;
     std::unordered_map<int, int> ask_vol;
     std::unordered_map<int, int> bid_vol;
 
     std::unordered_map<int, std::list<order_t>::iterator> orders;
-    std::unordered_map<int, order_t> info;
     int ask_tot;
     int bid_tot;
 };

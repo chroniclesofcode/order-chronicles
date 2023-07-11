@@ -26,6 +26,5 @@ void Init() {
     std::cout << orders.totalVolume(0) << std::endl;
     orders.cancelOrder(c2);
     std::cout << orders.lowestAsk() << std::endl;
-    std::cout << orders.highestBid() << std::endl;
     std::cout << orders.totalVolume(0) << std::endl;
 }
