@@ -19,7 +19,66 @@ public:
         bid_tot = 0;
     }
 
+    void execute_trade(Order bid, Order ask, int price, int quantity) { 
+        std::cout << "trade occured for " << quantity << " quantity and $" << ask.price << " giving us " << quantity * ask.price << " return\n";
+    }
+
+    void process_limit(Order &o) {
+        if (o.direction) {
+            int lowest = lowestAsk();
+            while (o.price >= lowest && o.quantity > 0) {
+                std::list<order_t> &order_q = asks[lowest];
+                auto it = order_q.begin();
+                while (it != order_q.end() && o.quantity > 0) {
+                    auto &ask = *it;
+                    if (o.quantity >= ask.quantity) {
+                        execute_trade(o, ask, lowest, ask.quantity);
+                        o.quantity -= ask.quantity;
+                        // ask.quantity = 0;
+                        int rmid = ask.id;
+                        it++;
+                        removeOrder(rmid);
+                    } else {
+                        execute_trade(o, ask, lowest, o.quantity);
+                        ask.quantity -= o.quantity;
+                        o.quantity = 0;
+                        it++;
+                    }
+                }
+                lowest = lowestAsk();
+            }
+        } else {
+            int highest = highestBid();
+            while (o.price <= highest && o.quantity > 0) {
+                std::list<order_t> &order_q = bids[highest];
+                auto it = order_q.begin();
+                while (it != order_q.end() && o.quantity > 0) {
+                    auto &bid = *it;
+                    if (o.quantity >= bid.quantity) {
+                        execute_trade(bid, o, highest, bid.quantity);
+                        o.quantity -= bid.quantity;
+                        // bid.quantity = 0;
+                        int rmid = bid.id;
+                        it++;
+                        removeOrder(rmid);
+                    } else {
+                        execute_trade(bid, o, highest, o.quantity);
+                        bid.quantity -= o.quantity;
+                        o.quantity = 0;
+                        it++;
+                    }
+                }
+                highest = highestBid();
+            }
+        }
+    }
+
+    // 1 is bids, 0 is asks
     int addOrder(Order o) {
+        process_limit(o);
+        if (o.quantity <= 0) {
+            return -1;
+        }
         if (o.direction) {
             std::list<order_t> &order_q = bids[o.price];
             order_q.push_back(o);
@@ -38,7 +97,8 @@ public:
         return o.id;
     }
 
-    void cancelOrder(int orderid) {
+    void removeOrder(int orderid) {
+        if (orderid < 0) return;
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
         Order &o = *it;
@@ -74,12 +134,12 @@ public:
     }
 
     int highestBid() {
-        if (bids.empty()) return -1;
+        if (bids.empty()) return MIN_PRICE;
         return (bids.begin())->first;
     }
 
     int lowestAsk() {
-        if (asks.empty()) return -1;
+        if (asks.empty()) return MAX_PRICE;
         return (asks.begin())->first;
     }
 
@@ -114,4 +174,7 @@ private:
     std::unordered_map<int, std::list<order_t>::iterator> orders;
     int ask_tot;
     int bid_tot;
+
+    const int MIN_PRICE = -1;
+    const int MAX_PRICE = 9999999;
 };
