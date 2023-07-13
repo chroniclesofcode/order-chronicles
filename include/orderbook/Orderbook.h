@@ -45,7 +45,10 @@ public:
                         it++;
                     }
                 }
+                // only 'no partial fills' left
+                int tmp = lowest;
                 lowest = lowestAsk();
+                if (tmp == lowest) break;
             }
         } else {
             int highest = highestBid();
@@ -68,7 +71,10 @@ public:
                         it++;
                     }
                 }
+                int tmp = highest;
+                // only 'no partial fills' left
                 highest = highestBid();
+                if (tmp == highest) break;
             }
         }
     }

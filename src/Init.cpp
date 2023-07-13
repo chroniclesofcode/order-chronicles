@@ -1,9 +1,14 @@
+#include <string>
+#include <fstream>
 #include "orderbook/Init.h"
+#include "orderbook/LOBSTER/MessageParser.h"
 
 int Order::order_count = 0;
 
-void Init() {
+void Init(std::string message_file) {
     Orderbook orders;
+
+    FILE *msgs;
 
     std::cout << "setting up\n";
 
