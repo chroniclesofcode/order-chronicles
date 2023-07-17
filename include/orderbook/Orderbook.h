@@ -19,11 +19,11 @@ public:
         bid_tot = 0;
     }
 
-    void execute_trade(Order bid, Order ask, int price, int quantity) { 
+    void executeTrade(Order bid, Order ask, int price, int quantity) { 
         std::cout << "trade occured for " << quantity << " quantity and $" << ask.price << " giving us " << quantity * ask.price << " return\n";
     }
 
-    void process_limit(Order &o) {
+    void processLimit(Order &o) {
         if (o.direction) {
             int lowest = lowestAsk();
             while (o.price >= lowest && o.quantity > 0) {
@@ -32,14 +32,14 @@ public:
                 while (it != order_q.end() && o.quantity > 0) {
                     auto &ask = *it;
                     if (o.quantity >= ask.quantity) {
-                        execute_trade(o, ask, lowest, ask.quantity);
+                        executeTrade(o, ask, lowest, ask.quantity);
                         o.quantity -= ask.quantity;
                         // ask.quantity = 0;
                         int rmid = ask.id;
                         it++;
                         removeOrder(rmid);
                     } else {
-                        execute_trade(o, ask, lowest, o.quantity);
+                        executeTrade(o, ask, lowest, o.quantity);
                         ask.quantity -= o.quantity;
                         o.quantity = 0;
                         it++;
@@ -58,14 +58,14 @@ public:
                 while (it != order_q.end() && o.quantity > 0) {
                     auto &bid = *it;
                     if (o.quantity >= bid.quantity) {
-                        execute_trade(bid, o, highest, bid.quantity);
+                        executeTrade(bid, o, highest, bid.quantity);
                         o.quantity -= bid.quantity;
                         // bid.quantity = 0;
                         int rmid = bid.id;
                         it++;
                         removeOrder(rmid);
                     } else {
-                        execute_trade(bid, o, highest, o.quantity);
+                        executeTrade(bid, o, highest, o.quantity);
                         bid.quantity -= o.quantity;
                         o.quantity = 0;
                         it++;
@@ -81,7 +81,7 @@ public:
 
     // 1 is bids, 0 is asks
     int addOrder(Order o) {
-        process_limit(o);
+        processLimit(o);
         if (o.quantity <= 0) {
             return -1;
         }

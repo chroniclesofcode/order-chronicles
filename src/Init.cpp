@@ -1,6 +1,6 @@
 #include <string>
+#include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include "orderbook/Init.h"
 #include "orderbook/LOBSTER/MessageParser.h"
 
@@ -9,13 +9,16 @@ int Order::order_count = 0;
 void Init(std::string message_file) {
     Orderbook orders;
 
-    FILE *msgs;
-    try {
-        msgs = fopen(message_file.c_str(), 'r');
-        if (msg == NULL) throw;
-    } catch (...) {
-        std::cout << "Error opening file\n";
-        exit(1);
+    auto in = std::ifstream(message_file.c_str());
+    if (!in.is_open()) {
+		throw std::runtime_error("Unable to open file.");
+	}
+    std::string line;
+    while (in.good()) {
+        std::getline(in, line);
+        if (!line.size()) continue;
+        Order o = MessageParser::parseMessage(line);
+        orders.addOrder(o);
     }
 
     std::cout << "setting up\n";
