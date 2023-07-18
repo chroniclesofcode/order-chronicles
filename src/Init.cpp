@@ -18,9 +18,10 @@ void Init(std::string message_file) {
         std::getline(in, line);
         if (!line.size()) continue;
         Order o = MessageParser::parseMessage(line);
-        orders.addOrder(o);
+        orders.receive(o);
     }
 
+    /*
     std::cout << "setting up\n";
 
     orders.addOrder({ 130, 20, 0 });
@@ -34,4 +35,5 @@ void Init(std::string message_file) {
     orders.addOrder({ 120, 15, 0 }); // shouldn't run
 
     std::cout << "starting process tests\n";
+    */
 }

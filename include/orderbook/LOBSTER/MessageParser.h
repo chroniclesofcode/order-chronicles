@@ -3,8 +3,7 @@
 #include "../Order.h"
 
 class MessageParser {
-public:
-
+private:
     static void incrementNext(const std::string &s, int &i, int &j) {
         j = i+1;
         i = j;
@@ -12,6 +11,7 @@ public:
             i++;
         }
     }
+public: 
     static Order parseMessage(const std::string& s) {
         int j, i = 0;
         incrementNext(s, i, j);
@@ -31,8 +31,9 @@ public:
 
         incrementNext(s, i, j);
         int odir = stoi(s.substr(j, i));
+        odir = odir == 1 ? 1 : 0;
 
         std::cout << "time: " << otime << " etype: " << eventtype << " id: " << oid << " sz: " << osize << " price: " << oprice << " dir " << odir << std::endl;
-        return Order(0, 0, 0);
+        return Order(oprice, osize, odir, oid, eventtype, otime);
     }
 };

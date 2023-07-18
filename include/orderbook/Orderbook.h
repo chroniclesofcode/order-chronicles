@@ -80,7 +80,7 @@ public:
     }
 
     // 1 is bids, 0 is asks
-    int addOrder(Order o) {
+    int addOrder(Order &o) {
         processLimit(o);
         if (o.quantity <= 0) {
             return -1;
@@ -168,6 +168,24 @@ public:
             ret = ask_vol[price];
         }
         return ret;
+    }
+
+    void receive(Order &o) {
+        if (o.event_type == 1) {
+            addOrder(o);
+        } else if (o.event_type == 2) {
+
+        }  else if (o.event_type == 3) {
+            removeOrder(o.id);
+        }  else if (o.event_type == 4) {
+
+        }  else if (o.event_type == 5) {
+
+        }  else if (o.event_type == 6) {
+
+        }  else if (o.event_type == 7) {
+
+        }
     }
 
 private:

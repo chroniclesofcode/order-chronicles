@@ -12,9 +12,17 @@ public:
     int quantity;
     int direction;
     int id;
+    int event_type;
+    double time;
 
-    Order(int price, int quantity, int direction) :  price { price }, quantity{ quantity }, direction{ direction } {
+    // Used mainly for own testing
+    Order(int price, int quantity, int direction) :  price{ price }, quantity{ quantity }, direction{ direction } {
         id = order_count++;
     }
+
+    // Currently used for LOBSTER
+    Order(int price, int quantity, int direction, int id, int event_type, double time) : 
+    price{ price }, quantity{ quantity }, direction{ direction }, id{ id }, event_type{ event_type }, time{ time } { }
+    
 };
 
