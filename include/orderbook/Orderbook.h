@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <iterator>
+#include <limits>
 #include "Order.h"
 
 /*
@@ -104,7 +105,10 @@ public:
     }
 
     void removeOrder(int orderid) {
-        if (orderid < 0) return;
+        if (orders.find(orderid) == orders.end()) {
+            std::cout << "Error, cannot find order to remove with id " << orderid << '\n';
+            exit(1);
+        }
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
         Order &o = *it;
@@ -137,6 +141,16 @@ public:
             ask_vol[o.price] -= o.quantity;
             ask_tot -= o.quantity;
         }
+    }
+
+    void modifyOrder(int orderid, int quantity) {
+        if (orders.find(orderid) == orders.end()) {
+            std::cout << "Error, cannot find order to modify with id " << orderid << '\n';
+            exit(1);
+        }
+        // Get order
+        std::list<order_t>::iterator it = orders[orderid];
+        it->quantity = quantity;
     }
 
     int highestBid() {
@@ -199,6 +213,6 @@ private:
     int ask_tot;
     int bid_tot;
 
-    const int MIN_PRICE = -1;
-    const int MAX_PRICE = 9999999;
+    const int MIN_PRICE = std::numeric_limits<int>::min();
+    const int MAX_PRICE = std::numeric_limits<int>::max();
 };
