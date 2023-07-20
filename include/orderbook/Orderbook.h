@@ -5,6 +5,7 @@
 #include <list>
 #include <algorithm>
 #include <array>
+#include <vector>
 #include <iterator>
 #include <limits>
 #include "Order.h"
@@ -22,7 +23,7 @@ public:
 
     void printOrderbook() {
         std::cout << "\nBIDS\n";
-        for (auto e : bids) {
+        for (auto &e : bids) {
             std::cout << '$' << e.first << ": ";
             for (auto i : e.second) {
                 std::cout << i.quantity << ' ';
@@ -36,7 +37,7 @@ public:
         if (asks.empty()) {
             std::cout << "(EMPTY)";
         }
-        for (auto e : asks) {
+        for (auto &e : asks) {
             std::cout << '$' << e.first << ": ";
             for (auto i : e.second) {
                 std::cout << i.quantity << ' ';
@@ -214,6 +215,31 @@ public:
         return ret;
     }
 
+    void LOBSTERoutput(int level) {
+        std::vector<std::array<int,2>> a, b;
+        int ct = 0;
+        for (auto &e : asks) {
+            if (ct == level) break;
+            a.push_back({ e.first, ask_vol[e.first] });
+            ct++;
+        }
+        ct = 0;
+        for (auto &e : bids) {
+            if (ct == level) break;
+            b.push_back({ e.first, bid_vol[e.first] });
+            ct++;
+        }
+        for (int i = 0; i < level; i++) {
+            if (a.size() > i) {
+                std::cout << a[i][0] << ' ' << a[i][1] << ' ';
+            }
+            if (b.size() > i) {
+                std::cout << b[i][0] << ' ' << b[i][1] << ' ';
+            }
+        }
+        std::cout << '\n';
+    }
+
     void receive(Order &o) {
         if (o.event_type == 1) {
             addOrder(o);
@@ -230,7 +256,7 @@ public:
         }  else if (o.event_type == 7) {
 
         }
-        printOrderbook();
+        LOBSTERoutput(1);
     }
 
 private:
