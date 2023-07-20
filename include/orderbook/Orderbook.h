@@ -230,10 +230,8 @@ public:
             ct++;
         }
         for (int i = 0; i < level; i++) {
-            if (a.size() > i) {
+            if (a.size() > i && b.size() > i) {
                 std::cout << a[i][0] << ' ' << a[i][1] << ' ';
-            }
-            if (b.size() > i) {
                 std::cout << b[i][0] << ' ' << b[i][1] << ' ';
             }
         }
