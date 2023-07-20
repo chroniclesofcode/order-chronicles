@@ -20,8 +20,34 @@ public:
         bid_tot = 0;
     }
 
+    void printOrderbook() {
+        std::cout << "\nBIDS\n";
+        for (auto e : bids) {
+            std::cout << '$' << e.first << ": ";
+            for (auto i : e.second) {
+                std::cout << i.quantity << ' ';
+            }
+            std::cout << '\n';
+        }
+        if (bids.empty()) {
+            std::cout << "(EMPTY)";
+        }
+        std::cout << "\nASKS\n";
+        if (asks.empty()) {
+            std::cout << "(EMPTY)";
+        }
+        for (auto e : asks) {
+            std::cout << '$' << e.first << ": ";
+            for (auto i : e.second) {
+                std::cout << i.quantity << ' ';
+            }
+            std::cout << '\n';
+        }
+        std::cout << '\n';
+    }
+
     void executeTrade(Order bid, Order ask, int price, int quantity) { 
-        std::cout << "trade occured for " << quantity << " quantity and $" << ask.price << " giving us " << quantity * ask.price << " return\n";
+        std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
     }
 
     void processLimit(Order &o) {
@@ -148,6 +174,10 @@ public:
             std::cout << "Error, cannot find order to modify with id " << orderid << '\n';
             exit(1);
         }
+        if (quantity == 0) {
+            removeOrder(orderid);
+            return;
+        }
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
         it->quantity = quantity;
@@ -188,7 +218,7 @@ public:
         if (o.event_type == 1) {
             addOrder(o);
         } else if (o.event_type == 2) {
-
+            modifyOrder(o.id, o.quantity);
         }  else if (o.event_type == 3) {
             removeOrder(o.id);
         }  else if (o.event_type == 4) {
@@ -200,6 +230,7 @@ public:
         }  else if (o.event_type == 7) {
 
         }
+        printOrderbook();
     }
 
 private:
