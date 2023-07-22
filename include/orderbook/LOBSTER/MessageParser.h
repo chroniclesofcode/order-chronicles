@@ -1,17 +1,31 @@
 #pragma once
 #include <string>
 #include "../Order.h"
+#include "../Orderbook.h"
 
 class MessageParser {
-private:
-    static void incrementNext(const std::string &s, int &i, int &j) {
-        j = i+1;
-        i = j;
-        while (i < s.size() && s[i] != ',') {
-            i++;
-        }
-    }
 public: 
+    MessageParser(Orderbook &orders) : orders{ orders } {}
+
+    void receive(Order &o) {
+        if (o.event_type == 1) {
+            orders.addOrder(o);
+        } else if (o.event_type == 2) {
+            orders.modifyOrder(o.id, o.quantity);
+        }  else if (o.event_type == 3) {
+            orders.removeOrder(o.id);
+        }  else if (o.event_type == 4) {
+
+        }  else if (o.event_type == 5) {
+
+        }  else if (o.event_type == 6) {
+
+        }  else if (o.event_type == 7) {
+
+        }
+        orders.LOBSTERoutput(1);
+    }
+
     static Order parseMessage(const std::string& s) {
         int j, i = 0;
         incrementNext(s, i, j);
@@ -36,4 +50,14 @@ public:
         std::cout << "time: " << otime << " etype: " << eventtype << " id: " << oid << " sz: " << osize << " price: " << oprice << " dir " << odir << std::endl;
         return Order(oprice, osize, odir, oid, eventtype, otime);
     }
+private:
+    static void incrementNext(const std::string &s, int &i, int &j) {
+        j = i+1;
+        i = j;
+        while (i < s.size() && s[i] != ',') {
+            i++;
+        }
+    }
+
+    Orderbook &orders;
 };

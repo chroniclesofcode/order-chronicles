@@ -8,6 +8,7 @@ int Order::order_count = 0;
 
 void Init(std::string message_file) {
     Orderbook orders;
+    MessageParser parser(orders);
 
     auto in = std::ifstream(message_file.c_str());
     if (!in.is_open()) {
@@ -18,7 +19,7 @@ void Init(std::string message_file) {
         std::getline(in, line);
         if (!line.size()) continue;
         Order o = MessageParser::parseMessage(line);
-        orders.receive(o);
+        parser.receive(o);
     }
 
     /*

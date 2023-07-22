@@ -134,7 +134,8 @@ public:
     void removeOrder(int orderid) {
         if (orders.find(orderid) == orders.end()) {
             std::cout << "Error, cannot find order to remove with id " << orderid << '\n';
-            exit(1);
+            //exit(1);
+            return;
         }
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
@@ -173,7 +174,8 @@ public:
     void modifyOrder(int orderid, int quantity) {
         if (orders.find(orderid) == orders.end()) {
             std::cout << "Error, cannot find order to modify with id " << orderid << '\n';
-            exit(1);
+            //exit(1);
+            return;
         }
         if (quantity == 0) {
             removeOrder(orderid);
@@ -236,25 +238,6 @@ public:
             }
         }
         std::cout << '\n';
-    }
-
-    void receive(Order &o) {
-        if (o.event_type == 1) {
-            addOrder(o);
-        } else if (o.event_type == 2) {
-            modifyOrder(o.id, o.quantity);
-        }  else if (o.event_type == 3) {
-            removeOrder(o.id);
-        }  else if (o.event_type == 4) {
-
-        }  else if (o.event_type == 5) {
-
-        }  else if (o.event_type == 6) {
-
-        }  else if (o.event_type == 7) {
-
-        }
-        LOBSTERoutput(1);
     }
 
 private:
