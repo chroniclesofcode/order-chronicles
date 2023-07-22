@@ -47,13 +47,13 @@ public:
         std::cout << '\n';
     }
 
-    void executeTrade(Order bid, Order ask, int price, int quantity) { 
+    void executeTrade(Order bid, Order ask, uint64_t price, int quantity) { 
         std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
     }
 
     void processLimit(Order &o) {
         if (o.direction) {
-            int lowest = lowestAsk();
+            uint64_t lowest = lowestAsk();
             while (o.price >= lowest && o.quantity > 0) {
                 std::list<order_t> &order_q = asks[lowest];
                 auto it = order_q.begin();
@@ -79,7 +79,7 @@ public:
                 if (tmp == lowest) break;
             }
         } else {
-            int highest = highestBid();
+            uint64_t highest = highestBid();
             while (o.price <= highest && o.quantity > 0) {
                 std::list<order_t> &order_q = bids[highest];
                 auto it = order_q.begin();
@@ -218,39 +218,38 @@ public:
     }
 
     void LOBSTERoutput(int level) {
-        std::vector<std::array<int,2>> a, b;
+        std::vector<std::array<uint64_t,2>> a, b;
         int ct = 0;
         for (auto &e : asks) {
             if (ct == level) break;
-            a.push_back({ e.first, ask_vol[e.first] });
+            a.push_back({ e.first, (uint64_t)ask_vol[e.first] });
             ct++;
         }
         ct = 0;
         for (auto &e : bids) {
             if (ct == level) break;
-            b.push_back({ e.first, bid_vol[e.first] });
+            b.push_back({ e.first, (uint64_t)bid_vol[e.first] });
             ct++;
         }
         for (int i = 0; i < level; i++) {
             if (a.size() > i && b.size() > i) {
-                std::cout << a[i][0] << ' ' << a[i][1] << ' ';
-                std::cout << b[i][0] << ' ' << b[i][1] << ' ';
+                std::cout << a[i][0] << ',' << a[i][1] << ',';
+                std::cout << b[i][0] << ',' << b[i][1] << (i + 1 == b.size() ?  '\n' : ',');
             }
         }
-        std::cout << '\n';
     }
 
 private:
     typedef Order order_t;
-    std::map<int, std::list<order_t>, std::greater<int>> bids;
-    std::map<int, std::list<order_t>> asks;
-    std::unordered_map<int, int> ask_vol;
-    std::unordered_map<int, int> bid_vol;
+    std::map<uint64_t, std::list<order_t>, std::greater<int>> bids;
+    std::map<uint64_t, std::list<order_t>> asks;
+    std::unordered_map<uint64_t, int> ask_vol;
+    std::unordered_map<uint64_t, int> bid_vol;
 
     std::unordered_map<int, std::list<order_t>::iterator> orders;
     int ask_tot;
     int bid_tot;
 
-    const int MIN_PRICE = std::numeric_limits<int>::min();
-    const int MAX_PRICE = std::numeric_limits<int>::max();
+    const uint64_t MIN_PRICE = std::numeric_limits<uint64_t>::min();
+    const uint64_t MAX_PRICE = std::numeric_limits<uint64_t>::max();
 };

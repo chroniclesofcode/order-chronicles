@@ -22,38 +22,73 @@ public:
             Order opp(o.price, o.quantity, !o.direction, ID_MAX, 1, o.time);
             orders.addOrder(opp);
         }  else if (o.event_type == 5) {
-
+            // Unrelated
         }  else if (o.event_type == 6) {
-
+            // Unrelated
         }  else if (o.event_type == 7) {
-
+            // Unrelated
         }
-        //orders.LOBSTERoutput(1);
+        orders.LOBSTERoutput(50);
     }
 
     static Order parseMessage(const std::string& s) {
-        int j, i = 0;
+        int j = -1, i = 0;
         incrementNext(s, i, j);
         double otime = stod(s.substr(0, i-1));
 
         incrementNext(s, i, j);
-        int eventtype = stoi(s.substr(j, i));
+        int eventtype = stoi(s.substr(j, i-j));
 
         incrementNext(s, i, j);
-        int oid = stoi(s.substr(j, i));
+        int oid = stoi(s.substr(j, i-j));
 
         incrementNext(s, i, j);
-        int osize = stoi(s.substr(j, i));
+        int osize = stoi(s.substr(j, i-j));
 
         incrementNext(s, i, j);
-        int oprice = stoi(s.substr(j, i));
+        uint64_t oprice = stoull(s.substr(j, i-j));
 
         incrementNext(s, i, j);
-        int odir = stoi(s.substr(j, i));
+        int odir = stoi(s.substr(j, i-j));
         odir = odir == 1 ? 1 : 0;
 
         //std::cout << "time: " << otime << " etype: " << eventtype << " id: " << oid << " sz: " << osize << " price: " << oprice << " dir " << odir << std::endl;
         return Order(oprice, osize, odir, oid, eventtype, otime);
+    }
+
+    // Populates orderbook with the entries from the LOBSTER orderbook file
+    // Not 100% accurate reflection of the entire orderbook, but the
+    // first 50 price levels should generally enough for a couple hundred
+    // trades.
+    // Currently just using increasing order-ids -> not optimal but LOBSTER
+    // data will be very hard to find order-ids below 2 digits
+    void populate(const std::string &s) {
+        int start_id = 0;
+        int i = -1, j = -1;
+        int ct = 0;
+        uint64_t price = 0;
+        int quantity = 0;
+        while (i < (int)s.size()) {
+            incrementNext(s, i, j);
+            if (ct % 4 == 0) {
+                price = stoull(s.substr(j, i-j));
+            } else if (ct % 4 == 1) {
+                quantity = stoi(s.substr(j, i-j));
+                Order n = Order(price, quantity, 0, start_id, 1, 0.0);
+                std::cout << "ADDED SELL ORDER WITH " << n.price << " " << n.quantity << " ID: " << start_id << '\n';
+                orders.addOrder(n);
+                start_id++;
+            } else if (ct % 4 == 2) {
+                price = stoull(s.substr(j, i-j));
+            } else if (ct % 4 == 3) {
+                quantity = stoi(s.substr(j, i-j));
+                Order n = Order(price, quantity, 1, start_id, 1, 0.0);
+                std::cout << "ADDED BUY ORDER WITH " << n.price << " " << n.quantity << " ID: " << start_id << '\n';
+                orders.addOrder(n);
+                start_id++;
+            }
+            ct++;
+        }
     }
 private:
     static void incrementNext(const std::string &s, int &i, int &j) {
