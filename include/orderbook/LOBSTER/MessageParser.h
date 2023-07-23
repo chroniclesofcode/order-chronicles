@@ -28,7 +28,7 @@ public:
         }  else if (o.event_type == 7) {
             // Unrelated
         }
-        orders.LOBSTERoutput(50);
+        orders.LOBSTERoutput(LOB_NUM);
     }
 
     static Order parseMessage(const std::string& s) {
@@ -75,7 +75,6 @@ public:
             } else if (ct % 4 == 1) {
                 quantity = stoi(s.substr(j, i-j));
                 Order n = Order(price, quantity, 0, start_id, 1, 0.0);
-                std::cout << "ADDED SELL ORDER WITH " << n.price << " " << n.quantity << " ID: " << start_id << '\n';
                 orders.addOrder(n);
                 start_id++;
             } else if (ct % 4 == 2) {
@@ -83,12 +82,12 @@ public:
             } else if (ct % 4 == 3) {
                 quantity = stoi(s.substr(j, i-j));
                 Order n = Order(price, quantity, 1, start_id, 1, 0.0);
-                std::cout << "ADDED BUY ORDER WITH " << n.price << " " << n.quantity << " ID: " << start_id << '\n';
                 orders.addOrder(n);
                 start_id++;
             }
             ct++;
         }
+        orders.LOBSTERoutput(LOB_NUM);
     }
 private:
     static void incrementNext(const std::string &s, int &i, int &j) {
@@ -101,4 +100,5 @@ private:
 
     Orderbook &orders;
     int ID_MAX = std::numeric_limits<int>::max();
+    const int LOB_NUM = 50;
 };

@@ -48,7 +48,7 @@ public:
     }
 
     void executeTrade(Order bid, Order ask, uint64_t price, int quantity) { 
-        std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
+        //std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
     }
 
     void processLimit(Order &o) {
@@ -131,9 +131,13 @@ public:
         return o.id;
     }
 
+    bool orderIdExists(int orderid) {
+        return orders.find(orderid) != orders.end();
+    }
+
     void removeOrder(int orderid) {
-        if (orders.find(orderid) == orders.end()) {
-            std::cout << "Error, cannot find order to remove with id " << orderid << '\n';
+        if (!orderIdExists(orderid)) {
+            //std::cout << "Error, cannot find order to remove with id " << orderid << '\n';
             //exit(1);
             return;
         }
@@ -172,8 +176,8 @@ public:
     }
 
     void modifyOrder(int orderid, int quantity) {
-        if (orders.find(orderid) == orders.end()) {
-            std::cout << "Error, cannot find order to modify with id " << orderid << '\n';
+        if (!orderIdExists(orderid)) {
+            //std::cout << "Error, cannot find order to modify with id " << orderid << '\n';
             //exit(1);
             return;
         }
@@ -232,10 +236,17 @@ public:
             ct++;
         }
         for (int i = 0; i < level; i++) {
-            if (a.size() > i && b.size() > i) {
+            if (a.size() > i) {
                 std::cout << a[i][0] << ',' << a[i][1] << ',';
-                std::cout << b[i][0] << ',' << b[i][1] << (i + 1 == b.size() ?  '\n' : ',');
+            } else {
+                std::cout << MAX_PRICE << ',' << 0 << ',';
             }
+            if (b.size() > i) {
+                std::cout << b[i][0] << ',' << b[i][1];
+            } else {
+                std::cout << MIN_PRICE << ',' << 0;
+            }
+            std::cout << (i == level - 1 ? '\n' : ',');
         }
     }
 
@@ -250,6 +261,6 @@ private:
     int ask_tot;
     int bid_tot;
 
-    const uint64_t MIN_PRICE = std::numeric_limits<uint64_t>::min();
-    const uint64_t MAX_PRICE = std::numeric_limits<uint64_t>::max();
+    const uint64_t MIN_PRICE = -9999999999;
+    const uint64_t MAX_PRICE = 9999999999;
 };

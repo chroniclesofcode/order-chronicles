@@ -14,7 +14,6 @@ void Init(std::string message_file, std::string book_file) {
 		throw std::runtime_error("Unable to open file.");
 	}
     
-    bool HAS_BOOK = false;
 
     if (book_file.length() > 0) {
         auto in2 = std::ifstream(book_file.c_str());
@@ -25,19 +24,15 @@ void Init(std::string message_file, std::string book_file) {
         std::getline(in2, firstline);
         if (!firstline.size()) exit(1);
         parser.populate(firstline);
-        HAS_BOOK = true;
     }
 
     std::string line;
+    // Don't process the first line of messages to align orderbook and 
+    // messages properly for LOBSTER
+    std::getline(in, line);
     while (in.good()) {
         std::getline(in, line);
         if (!line.size()) continue;
-        // If populated orderbook with entries, we skip the first line to align
-        // our book and LOBSTER book properly
-        if (HAS_BOOK) {
-            HAS_BOOK = false;
-            continue;
-        }
         Order o = MessageParser::parseMessage(line);
         parser.receive(o);
     }
