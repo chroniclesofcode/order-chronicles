@@ -13,7 +13,11 @@ public:
         } else if (o.event_type == 2) {
             orders.modifyOrder(o.id, o.quantity);
         }  else if (o.event_type == 3) {
-            orders.removeOrder(o.id);
+            if (orders.orderIdExists(o.id)) {
+                orders.removeOrder(o.id);
+            } else {
+                orders.forceRemoveOrder(o);
+            }
         }  else if (o.event_type == 4) {
             /* This occurs when the orderbook indicates that a trade has occured
                for a certain entry in the orderbook. It does not give us the

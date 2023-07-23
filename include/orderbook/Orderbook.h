@@ -58,7 +58,7 @@ public:
                 std::list<order_t> &order_q = asks[lowest];
                 auto it = order_q.begin();
                 while (it != order_q.end() && o.quantity > 0) {
-                    auto &ask = *it;
+                    order_t &ask = *it;
                     if (o.quantity >= ask.quantity) {
                         executeTrade(o, ask, lowest, ask.quantity);
                         o.quantity -= ask.quantity;
@@ -84,7 +84,7 @@ public:
                 std::list<order_t> &order_q = bids[highest];
                 auto it = order_q.begin();
                 while (it != order_q.end() && o.quantity > 0) {
-                    auto &bid = *it;
+                    order_t &bid = *it;
                     if (o.quantity >= bid.quantity) {
                         executeTrade(bid, o, highest, bid.quantity);
                         o.quantity -= bid.quantity;
@@ -172,6 +172,66 @@ public:
 
             ask_vol[o.price] -= o.quantity;
             ask_tot -= o.quantity;
+        }
+    }
+
+    /* This function is very unsafe - try not to use it unless needed. It will
+       take in an order, and forcibly erase price * quantity value of orders 
+       from the front of the price-priority queue. Currently, useful for when
+       initializing a LOBSTER orderbook, and we need to cancel an order from
+       previous time periods, so we don't actually have the order + orderid 
+       in the system. This will force-cancel some orders to ensure the orderbook
+       remains synced on our side and the LOBSTER side. Also, if all orders are
+       removed, it will stop there - it should not move onto the next price
+       point. */
+    void forceRemoveOrder(Order &o) {
+        if (o.direction) {
+            std::list<order_t> &order_q = bids[o.price];
+            auto it = order_q.begin();
+            while (it != order_q.end() && o.quantity > 0) {
+                if (it->quantity > o.quantity) {
+                    it->quantity -= o.quantity;
+                    it++;
+                    bid_vol[o.price] -= o.quantity;
+                    bid_tot -= o.quantity;
+                    o.quantity = 0;
+                } else {
+                    o.quantity -= it->quantity;
+
+                    auto tmp = it;
+                    it++;
+                    removeOrder(tmp->id);
+                }
+            }
+
+            // Delete key if all orders erased
+            if (order_q.empty()) {
+                bids.erase(o.price);
+            }
+        } else {
+            std::list<order_t> &order_q = asks[o.price];
+
+            auto it = order_q.begin();
+            while (it != order_q.end() && o.quantity > 0) {
+                if (it->quantity > o.quantity) {
+                    it->quantity -= o.quantity;
+                    it++;
+                    ask_vol[o.price] -= o.quantity;
+                    ask_tot -= o.quantity;
+                    o.quantity = 0;
+                } else {
+                    o.quantity -= it->quantity;
+
+                    auto tmp = it;
+                    it++;
+                    removeOrder(tmp->id);
+                }
+            }
+
+            // Delete key if all orders erased
+            if (order_q.empty()) {
+                asks.erase(o.price);
+            }
         }
     }
 
