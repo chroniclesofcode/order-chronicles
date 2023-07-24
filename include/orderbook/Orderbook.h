@@ -62,13 +62,14 @@ public:
                     if (o.quantity >= ask.quantity) {
                         executeTrade(o, ask, lowest, ask.quantity);
                         o.quantity -= ask.quantity;
-                        // ask.quantity = 0;
                         int rmid = ask.id;
                         it++;
                         removeOrder(rmid);
                     } else {
                         executeTrade(o, ask, lowest, o.quantity);
                         ask.quantity -= o.quantity;
+                        ask_vol[lowest] -= o.quantity;
+                        ask_tot -= o.quantity;
                         o.quantity = 0;
                         it++;
                     }
@@ -88,13 +89,14 @@ public:
                     if (o.quantity >= bid.quantity) {
                         executeTrade(bid, o, highest, bid.quantity);
                         o.quantity -= bid.quantity;
-                        // bid.quantity = 0;
                         int rmid = bid.id;
                         it++;
                         removeOrder(rmid);
                     } else {
                         executeTrade(bid, o, highest, o.quantity);
                         bid.quantity -= o.quantity;
+                        bid_vol[highest] -= o.quantity;
+                        bid_tot -= o.quantity;
                         o.quantity = 0;
                         it++;
                     }
@@ -149,7 +151,6 @@ public:
 
             order_q.erase(it);
             orders.erase(orderid);
-            //info.erase(orderid);
 
             // Delete key if all orders erased
             if (order_q.empty()) {
@@ -163,7 +164,6 @@ public:
 
             order_q.erase(it);
             orders.erase(orderid);
-            //info.erase(orderid);
 
             // Delete key if all orders erased
             if (order_q.empty()) {
