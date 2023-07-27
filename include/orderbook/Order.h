@@ -8,7 +8,7 @@ class Order {
 public:
     static int order_count;
 
-    uint64_t price;
+    int64_t price;
     int quantity;
     int direction;
     int id;
@@ -16,12 +16,12 @@ public:
     double time;
 
     // Used mainly for own testing
-    Order(uint64_t price, int quantity, int direction) :  price{ price }, quantity{ quantity }, direction{ direction } {
+    Order(int64_t price, int quantity, int direction) :  price{ price }, quantity{ quantity }, direction{ direction } {
         id = order_count++;
     }
 
     // Currently used for LOBSTER
-    Order(uint64_t price, int quantity, int direction, int id, int event_type, double time) : 
+    Order(int64_t price, int quantity, int direction, int id, int event_type, double time) : 
     price{ price }, quantity{ quantity }, direction{ direction }, id{ id }, event_type{ event_type }, time{ time } { }
     
 };

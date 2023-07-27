@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstdint>
 #include "../Order.h"
 #include "../Orderbook.h"
 
@@ -13,7 +14,11 @@ public:
         } else if (o.event_type == 2) {
             orders.modifyOrder(o.id, o.quantity);
         }  else if (o.event_type == 3) {
-            orders.removeOrder(o.id);
+            if (orders.orderIdExists(o.id)) {
+                orders.removeOrder(o.id);
+            } else {
+                orders.forceRemoveOrder(o);
+            }
         }  else if (o.event_type == 4) {
             /* This occurs when the orderbook indicates that a trade has occured
                for a certain entry in the orderbook. It does not give us the
@@ -46,7 +51,7 @@ public:
         int osize = stoi(s.substr(j, i-j));
 
         incrementNext(s, i, j);
-        uint64_t oprice = stoull(s.substr(j, i-j));
+        int64_t oprice = stoll(s.substr(j, i-j));
 
         incrementNext(s, i, j);
         int odir = stoi(s.substr(j, i-j));
@@ -66,23 +71,25 @@ public:
         int start_id = 0;
         int i = -1, j = -1;
         int ct = 0;
-        uint64_t price = 0;
+        int64_t price = 0;
         int quantity = 0;
         while (i < (int)s.size()) {
             incrementNext(s, i, j);
             if (ct % 4 == 0) {
-                price = stoull(s.substr(j, i-j));
+                price = stoll(s.substr(j, i-j));
             } else if (ct % 4 == 1) {
                 quantity = stoi(s.substr(j, i-j));
                 Order n = Order(price, quantity, 0, start_id, 1, 0.0);
-                orders.addOrder(n);
+                if (price > 0)
+                    orders.addOrder(n);
                 start_id++;
             } else if (ct % 4 == 2) {
-                price = stoull(s.substr(j, i-j));
+                price = stoll(s.substr(j, i-j));
             } else if (ct % 4 == 3) {
                 quantity = stoi(s.substr(j, i-j));
                 Order n = Order(price, quantity, 1, start_id, 1, 0.0);
-                orders.addOrder(n);
+                if (price > 0) 
+                    orders.addOrder(n);
                 start_id++;
             }
             ct++;

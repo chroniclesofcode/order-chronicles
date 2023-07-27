@@ -8,6 +8,7 @@
 #include <vector>
 #include <iterator>
 #include <limits>
+#include <cstdint>
 #include "Order.h"
 
 /*
@@ -47,28 +48,30 @@ public:
         std::cout << '\n';
     }
 
-    void executeTrade(Order bid, Order ask, uint64_t price, int quantity) { 
+    void executeTrade(Order bid, Order ask, int64_t price, int quantity) { 
         //std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
+        //std::cout << "ask id is " << ask.id << '\n';
     }
 
     void processLimit(Order &o) {
         if (o.direction) {
-            uint64_t lowest = lowestAsk();
+            int64_t lowest = lowestAsk();
             while (o.price >= lowest && o.quantity > 0) {
                 std::list<order_t> &order_q = asks[lowest];
                 auto it = order_q.begin();
                 while (it != order_q.end() && o.quantity > 0) {
-                    auto &ask = *it;
+                    order_t &ask = *it;
                     if (o.quantity >= ask.quantity) {
                         executeTrade(o, ask, lowest, ask.quantity);
                         o.quantity -= ask.quantity;
-                        // ask.quantity = 0;
                         int rmid = ask.id;
                         it++;
                         removeOrder(rmid);
                     } else {
                         executeTrade(o, ask, lowest, o.quantity);
                         ask.quantity -= o.quantity;
+                        ask_vol[lowest] -= o.quantity;
+                        ask_tot -= o.quantity;
                         o.quantity = 0;
                         it++;
                     }
@@ -79,22 +82,23 @@ public:
                 if (tmp == lowest) break;
             }
         } else {
-            uint64_t highest = highestBid();
+            int64_t highest = highestBid();
             while (o.price <= highest && o.quantity > 0) {
                 std::list<order_t> &order_q = bids[highest];
                 auto it = order_q.begin();
                 while (it != order_q.end() && o.quantity > 0) {
-                    auto &bid = *it;
+                    order_t &bid = *it;
                     if (o.quantity >= bid.quantity) {
                         executeTrade(bid, o, highest, bid.quantity);
                         o.quantity -= bid.quantity;
-                        // bid.quantity = 0;
                         int rmid = bid.id;
                         it++;
                         removeOrder(rmid);
                     } else {
                         executeTrade(bid, o, highest, o.quantity);
                         bid.quantity -= o.quantity;
+                        bid_vol[highest] -= o.quantity;
+                        bid_tot -= o.quantity;
                         o.quantity = 0;
                         it++;
                     }
@@ -149,7 +153,6 @@ public:
 
             order_q.erase(it);
             orders.erase(orderid);
-            //info.erase(orderid);
 
             // Delete key if all orders erased
             if (order_q.empty()) {
@@ -163,7 +166,6 @@ public:
 
             order_q.erase(it);
             orders.erase(orderid);
-            //info.erase(orderid);
 
             // Delete key if all orders erased
             if (order_q.empty()) {
@@ -172,6 +174,66 @@ public:
 
             ask_vol[o.price] -= o.quantity;
             ask_tot -= o.quantity;
+        }
+    }
+
+    /* This function is very unsafe - try not to use it unless needed. It will
+       take in an order, and forcibly erase price * quantity value of orders 
+       from the front of the price-priority queue. Currently, useful for when
+       initializing a LOBSTER orderbook, and we need to cancel an order from
+       previous time periods, so we don't actually have the order + orderid 
+       in the system. This will force-cancel some orders to ensure the orderbook
+       remains synced on our side and the LOBSTER side. Also, if all orders are
+       removed, it will stop there - it should not move onto the next price
+       point. */
+    void forceRemoveOrder(Order &o) {
+        if (o.direction) {
+            std::list<order_t> &order_q = bids[o.price];
+            auto it = order_q.begin();
+            while (it != order_q.end() && o.quantity > 0) {
+                if (it->quantity > o.quantity) {
+                    it->quantity -= o.quantity;
+                    it++;
+                    bid_vol[o.price] -= o.quantity;
+                    bid_tot -= o.quantity;
+                    o.quantity = 0;
+                } else {
+                    o.quantity -= it->quantity;
+
+                    auto tmp = it;
+                    it++;
+                    removeOrder(tmp->id);
+                }
+            }
+
+            // Delete key if all orders erased
+            if (order_q.empty()) {
+                bids.erase(o.price);
+            }
+        } else {
+            std::list<order_t> &order_q = asks[o.price];
+
+            auto it = order_q.begin();
+            while (it != order_q.end() && o.quantity > 0) {
+                if (it->quantity > o.quantity) {
+                    it->quantity -= o.quantity;
+                    it++;
+                    ask_vol[o.price] -= o.quantity;
+                    ask_tot -= o.quantity;
+                    o.quantity = 0;
+                } else {
+                    o.quantity -= it->quantity;
+
+                    auto tmp = it;
+                    it++;
+                    removeOrder(tmp->id);
+                }
+            }
+
+            // Delete key if all orders erased
+            if (order_q.empty()) {
+                asks.erase(o.price);
+            }
         }
     }
 
@@ -187,7 +249,18 @@ public:
         }
         // Get order
         std::list<order_t>::iterator it = orders[orderid];
-        it->quantity = quantity;
+        if (quantity >= it->quantity) {
+            removeOrder(orderid);
+            return;
+        }
+        if (it->direction) {
+            bid_tot -= quantity;
+            bid_vol[it->price] -= quantity;
+        } else {
+            ask_tot -= quantity;
+            ask_vol[it->price] -= quantity;
+        }
+        it->quantity -= quantity;
     }
 
     int highestBid() {
@@ -222,17 +295,17 @@ public:
     }
 
     void LOBSTERoutput(int level) {
-        std::vector<std::array<uint64_t,2>> a, b;
+        std::vector<std::array<int64_t,2>> a, b;
         int ct = 0;
         for (auto &e : asks) {
             if (ct == level) break;
-            a.push_back({ e.first, (uint64_t)ask_vol[e.first] });
+            a.push_back({ e.first, (int64_t)ask_vol[e.first] });
             ct++;
         }
         ct = 0;
         for (auto &e : bids) {
             if (ct == level) break;
-            b.push_back({ e.first, (uint64_t)bid_vol[e.first] });
+            b.push_back({ e.first, (int64_t)bid_vol[e.first] });
             ct++;
         }
         for (int i = 0; i < level; i++) {
@@ -252,15 +325,15 @@ public:
 
 private:
     typedef Order order_t;
-    std::map<uint64_t, std::list<order_t>, std::greater<int>> bids;
-    std::map<uint64_t, std::list<order_t>> asks;
-    std::unordered_map<uint64_t, int> ask_vol;
-    std::unordered_map<uint64_t, int> bid_vol;
+    std::map<int64_t, std::list<order_t>, std::greater<int>> bids;
+    std::map<int64_t, std::list<order_t>> asks;
+    std::unordered_map<int64_t, int> ask_vol;
+    std::unordered_map<int64_t, int> bid_vol;
 
     std::unordered_map<int, std::list<order_t>::iterator> orders;
     int ask_tot;
     int bid_tot;
 
-    const uint64_t MIN_PRICE = -9999999999;
-    const uint64_t MAX_PRICE = 9999999999;
+    const int64_t MIN_PRICE = -9999999999;
+    const int64_t MAX_PRICE = 9999999999;
 };
