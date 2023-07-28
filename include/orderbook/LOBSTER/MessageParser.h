@@ -25,6 +25,9 @@ public:
                entry that caused the match, so we create it ourselves to
                imitate this functionality */
             Order opp(o.price, o.quantity, !o.direction, ID_MAX, 1, o.time);
+            if (orders.orderIdExists(o.id)) {
+                opp.setUnfound(true);
+            }
             orders.addOrder(opp);
         }  else if (o.event_type == 5) {
             // Unrelated

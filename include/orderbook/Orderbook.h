@@ -49,8 +49,8 @@ public:
     }
 
     void executeTrade(Order bid, Order ask, int64_t price, int quantity) { 
-        //std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
-        //std::cout << "ask id is " << ask.id << '\n';
+        std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
+        std::cout << "ask id is " << ask.id << '\n';
     }
 
     void processLimit(Order &o) {
