@@ -26,7 +26,7 @@ public:
                imitate this functionality */
             Order opp(o.price, o.quantity, !o.direction, ID_MAX, 1, o.time);
             if (orders.orderIdExists(o.id)) {
-                opp.setUnfound(true);
+                opp.setCorresp(o.id);
             }
             orders.addOrder(opp);
         }  else if (o.event_type == 5) {

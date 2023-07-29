@@ -48,9 +48,8 @@ public:
         std::cout << '\n';
     }
 
-    void executeTrade(Order bid, Order ask, int64_t price, int quantity) { 
-        std::cout << "trade occured for " << quantity << " quantity at $" << price << " giving us " << quantity * price << " return\n";
-        std::cout << "ask id is " << ask.id << '\n';
+    void executeTrade(Order bid, Order ask, int64_t price, int quantity, int in_dir) { 
+        //std::cout << "TRADE OCCURED\n";
     }
 
     void processLimit(Order &o) {
@@ -62,13 +61,13 @@ public:
                 while (it != order_q.end() && o.quantity > 0) {
                     order_t &ask = *it;
                     if (o.quantity >= ask.quantity) {
-                        executeTrade(o, ask, lowest, ask.quantity);
+                        executeTrade(o, ask, lowest, ask.quantity, o.direction);
                         o.quantity -= ask.quantity;
                         int rmid = ask.id;
                         it++;
                         removeOrder(rmid);
                     } else {
-                        executeTrade(o, ask, lowest, o.quantity);
+                        executeTrade(o, ask, lowest, o.quantity, o.direction);
                         ask.quantity -= o.quantity;
                         ask_vol[lowest] -= o.quantity;
                         ask_tot -= o.quantity;
@@ -89,13 +88,13 @@ public:
                 while (it != order_q.end() && o.quantity > 0) {
                     order_t &bid = *it;
                     if (o.quantity >= bid.quantity) {
-                        executeTrade(bid, o, highest, bid.quantity);
+                        executeTrade(bid, o, highest, bid.quantity, o.direction);
                         o.quantity -= bid.quantity;
                         int rmid = bid.id;
                         it++;
                         removeOrder(rmid);
                     } else {
-                        executeTrade(bid, o, highest, o.quantity);
+                        executeTrade(bid, o, highest, o.quantity, o.direction);
                         bid.quantity -= o.quantity;
                         bid_vol[highest] -= o.quantity;
                         bid_tot -= o.quantity;
@@ -113,6 +112,15 @@ public:
 
     // 1 is bids, 0 is asks
     int addOrder(Order &o) {
+        if (o.corresp != -1) {
+            std::list<order_t>::iterator &rem = orders[o.corresp];
+            if (o.quantity >= rem->quantity) {
+                removeOrder(o.corresp);
+            } else {
+                modifyOrder(o.corresp, o.quantity);
+            }
+            return -1;
+        }
         processLimit(o);
         if (o.quantity <= 0) {
             return -1;
