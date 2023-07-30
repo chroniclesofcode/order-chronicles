@@ -3,7 +3,7 @@
 #include "orderbook/Init.h"
 #include "orderbook/Timer.h"
 
-#define TIMER_ON 1
+#define TIMER_ON 0
 #define IMPL "DEFAULT"
 
 int main(int argc, char **argv) {

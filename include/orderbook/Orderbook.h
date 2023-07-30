@@ -11,6 +11,19 @@
 #include <cstdint>
 #include "Order.h"
 
+typedef struct Entry {
+    Order o;
+    Entry *next;
+} Entry_t;
+
+typedef struct Point {
+    Entry_t *head;
+    Entry_t *tail;
+} Point_t;
+
+static const int MEM_LIMIT = 10000000;
+static Point_t prices[MEM_LIMIT]; // All asks and bids (can be same array since we cannot cross spread)
+
 /*
     Orderbook using a map (tree) + doubly linked lists.
     Matching engine uses price-time priority.
@@ -20,32 +33,12 @@ public:
     Orderbook() {
         ask_tot = 0;
         bid_tot = 0;
+        lowest_ask = MAX_PRICE;
+        highest_bid = MIN_PRICE;
+        memset(prices, 0, MEM_LIMIT * sizeof(Point_t));
     }
 
     void printOrderbook() {
-        std::cout << "\nBIDS\n";
-        for (auto &e : bids) {
-            std::cout << '$' << e.first << ": ";
-            for (auto i : e.second) {
-                std::cout << i.quantity << ' ';
-            }
-            std::cout << '\n';
-        }
-        if (bids.empty()) {
-            std::cout << "(EMPTY)";
-        }
-        std::cout << "\nASKS\n";
-        if (asks.empty()) {
-            std::cout << "(EMPTY)";
-        }
-        for (auto &e : asks) {
-            std::cout << '$' << e.first << ": ";
-            for (auto i : e.second) {
-                std::cout << i.quantity << ' ';
-            }
-            std::cout << '\n';
-        }
-        std::cout << '\n';
     }
 
     void executeTrade(Order bid, Order ask, int64_t price, int quantity, int in_dir) { 
@@ -53,136 +46,18 @@ public:
     }
 
     void processLimit(Order &o) {
-        if (o.direction) {
-            int64_t lowest = lowestAsk();
-            while (o.price >= lowest && o.quantity > 0) {
-                std::list<order_t> &order_q = asks[lowest];
-                auto it = order_q.begin();
-                while (it != order_q.end() && o.quantity > 0) {
-                    order_t &ask = *it;
-                    if (o.quantity >= ask.quantity) {
-                        executeTrade(o, ask, lowest, ask.quantity, o.direction);
-                        o.quantity -= ask.quantity;
-                        int rmid = ask.id;
-                        it++;
-                        removeOrder(rmid);
-                    } else {
-                        executeTrade(o, ask, lowest, o.quantity, o.direction);
-                        ask.quantity -= o.quantity;
-                        ask_vol[lowest] -= o.quantity;
-                        ask_tot -= o.quantity;
-                        o.quantity = 0;
-                        it++;
-                    }
-                }
-                // only 'no partial fills' left
-                int tmp = lowest;
-                lowest = lowestAsk();
-                if (tmp == lowest) break;
-            }
-        } else {
-            int64_t highest = highestBid();
-            while (o.price <= highest && o.quantity > 0) {
-                std::list<order_t> &order_q = bids[highest];
-                auto it = order_q.begin();
-                while (it != order_q.end() && o.quantity > 0) {
-                    order_t &bid = *it;
-                    if (o.quantity >= bid.quantity) {
-                        executeTrade(bid, o, highest, bid.quantity, o.direction);
-                        o.quantity -= bid.quantity;
-                        int rmid = bid.id;
-                        it++;
-                        removeOrder(rmid);
-                    } else {
-                        executeTrade(bid, o, highest, o.quantity, o.direction);
-                        bid.quantity -= o.quantity;
-                        bid_vol[highest] -= o.quantity;
-                        bid_tot -= o.quantity;
-                        o.quantity = 0;
-                        it++;
-                    }
-                }
-                int tmp = highest;
-                // only 'no partial fills' left
-                highest = highestBid();
-                if (tmp == highest) break;
-            }
-        }
     }
 
     // 1 is bids, 0 is asks
     int addOrder(Order &o) {
-        if (o.corresp != -1) {
-            std::list<order_t>::iterator &rem = orders[o.corresp];
-            if (o.quantity >= rem->quantity) {
-                removeOrder(o.corresp);
-            } else {
-                modifyOrder(o.corresp, o.quantity);
-            }
-            return -1;
-        }
-        processLimit(o);
-        if (o.quantity <= 0) {
-            return -1;
-        }
-        if (o.direction) {
-            std::list<order_t> &order_q = bids[o.price];
-            order_q.push_back(o);
-            orders[o.id] = std::prev(order_q.end());
-
-            bid_vol[o.price] += o.quantity;
-            bid_tot += o.quantity;
-        } else {
-            std::list<order_t> &order_q = asks[o.price];
-            order_q.push_back(o);
-            orders[o.id] = std::prev(order_q.end());
-
-            ask_vol[o.price] += o.quantity;
-            ask_tot += o.quantity;
-        }
-        return o.id;
+        return -1;
     }
 
     bool orderIdExists(int orderid) {
-        return orders.find(orderid) != orders.end();
+        return true;
     }
 
     void removeOrder(int orderid) {
-        if (!orderIdExists(orderid)) {
-            //std::cout << "Error, cannot find order to remove with id " << orderid << '\n';
-            //exit(1);
-            return;
-        }
-        // Get order
-        std::list<order_t>::iterator it = orders[orderid];
-        Order &o = *it;
-        if (o.direction) {
-            std::list<order_t> &order_q = bids[o.price];
-
-            order_q.erase(it);
-            orders.erase(orderid);
-
-            // Delete key if all orders erased
-            if (order_q.empty()) {
-                bids.erase(o.price);
-            }
-
-            bid_vol[o.price] -= o.quantity;
-            bid_tot -= o.quantity;
-        } else {
-            std::list<order_t> &order_q = asks[o.price];
-
-            order_q.erase(it);
-            orders.erase(orderid);
-
-            // Delete key if all orders erased
-            if (order_q.empty()) {
-                asks.erase(o.price);
-            }
-
-            ask_vol[o.price] -= o.quantity;
-            ask_tot -= o.quantity;
-        }
     }
 
     /* This function is very unsafe - try not to use it unless needed. It will
@@ -195,90 +70,18 @@ public:
        removed, it will stop there - it should not move onto the next price
        point. */
     void forceRemoveOrder(Order &o) {
-        if (o.direction) {
-            std::list<order_t> &order_q = bids[o.price];
-            auto it = order_q.begin();
-            while (it != order_q.end() && o.quantity > 0) {
-                if (it->quantity > o.quantity) {
-                    it->quantity -= o.quantity;
-                    it++;
-                    bid_vol[o.price] -= o.quantity;
-                    bid_tot -= o.quantity;
-                    o.quantity = 0;
-                } else {
-                    o.quantity -= it->quantity;
 
-                    auto tmp = it;
-                    it++;
-                    removeOrder(tmp->id);
-                }
-            }
-
-            // Delete key if all orders erased
-            if (order_q.empty()) {
-                bids.erase(o.price);
-            }
-        } else {
-            std::list<order_t> &order_q = asks[o.price];
-
-            auto it = order_q.begin();
-            while (it != order_q.end() && o.quantity > 0) {
-                if (it->quantity > o.quantity) {
-                    it->quantity -= o.quantity;
-                    it++;
-                    ask_vol[o.price] -= o.quantity;
-                    ask_tot -= o.quantity;
-                    o.quantity = 0;
-                } else {
-                    o.quantity -= it->quantity;
-
-                    auto tmp = it;
-                    it++;
-                    removeOrder(tmp->id);
-                }
-            }
-
-            // Delete key if all orders erased
-            if (order_q.empty()) {
-                asks.erase(o.price);
-            }
-        }
     }
 
     void modifyOrder(int orderid, int quantity) {
-        if (!orderIdExists(orderid)) {
-            //std::cout << "Error, cannot find order to modify with id " << orderid << '\n';
-            //exit(1);
-            return;
-        }
-        if (quantity == 0) {
-            removeOrder(orderid);
-            return;
-        }
-        // Get order
-        std::list<order_t>::iterator it = orders[orderid];
-        if (quantity >= it->quantity) {
-            removeOrder(orderid);
-            return;
-        }
-        if (it->direction) {
-            bid_tot -= quantity;
-            bid_vol[it->price] -= quantity;
-        } else {
-            ask_tot -= quantity;
-            ask_vol[it->price] -= quantity;
-        }
-        it->quantity -= quantity;
     }
 
     int highestBid() {
-        if (bids.empty()) return MIN_PRICE;
-        return (bids.begin())->first;
+        return -1;
     }
 
     int lowestAsk() {
-        if (asks.empty()) return MAX_PRICE;
-        return (asks.begin())->first;
+        return -1;
     }
 
     // 1 is bid, 0 is asks
@@ -303,42 +106,18 @@ public:
     }
 
     void LOBSTERoutput(int level) {
-        std::vector<std::array<int64_t,2>> a, b;
-        int ct = 0;
-        for (auto &e : asks) {
-            if (ct == level) break;
-            a.push_back({ e.first, (int64_t)ask_vol[e.first] });
-            ct++;
-        }
-        ct = 0;
-        for (auto &e : bids) {
-            if (ct == level) break;
-            b.push_back({ e.first, (int64_t)bid_vol[e.first] });
-            ct++;
-        }
-        for (int i = 0; i < level; i++) {
-            if (a.size() > i) {
-                std::cout << a[i][0] << ',' << a[i][1] << ',';
-            } else {
-                std::cout << MAX_PRICE << ',' << 0 << ',';
-            }
-            if (b.size() > i) {
-                std::cout << b[i][0] << ',' << b[i][1];
-            } else {
-                std::cout << MIN_PRICE << ',' << 0;
-            }
-            std::cout << (i == level - 1 ? '\n' : ',');
-        }
     }
 
 private:
     typedef Order order_t;
-    std::map<int64_t, std::list<order_t>, std::greater<int>> bids;
-    std::map<int64_t, std::list<order_t>> asks;
+
     std::unordered_map<int64_t, int> ask_vol;
     std::unordered_map<int64_t, int> bid_vol;
 
-    std::unordered_map<int, std::list<order_t>::iterator> orders;
+    std::unordered_map<int, Entry_t*> orders;
+
+    int64_t highest_bid;
+    int64_t lowest_ask;
     int ask_tot;
     int bid_tot;
 
