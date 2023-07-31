@@ -11,12 +11,14 @@ DONE:
 - Can print orderbook in LOBSTER format to compare to provided orderbook correctly
 - Can execute trades based on LOBSTER trade specifications
 - Pipes performance measurements into certain files
-
-TO DO:
-- Fix error in arrays implementation where certain orders are not being added
 - Measure performance of the different data implementations
 - Provide multiple runthroughs + statistics of each run
 - Create array-based orderbook (array -> doubly linked lists)
+
+TO DO:
+- Optimize array-based orderbook to use it's advantages more
+- Optimize parsing of orderbook
+- Heavy optimizations (at time of writing, default mean = 152ms, arrays mean = 167ms)
 - Create the orderbooks with/without STL
 - Consider Van Emde Boas Tree (instead of RB) for LogLogN speed
 - Update README for detailed information, including tradeoffs and results
@@ -26,6 +28,7 @@ FIXES:
 - Fix error where order type 4 matches improperly
 - Process LOBSTER order book data properly without fail
 - Revamp array-based orderbook due to price points being too large
+- Fix error in arrays implementation where certain orders are not being added
 
 # How to run
 
