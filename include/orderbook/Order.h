@@ -24,6 +24,11 @@ public:
         corresp = c;
     }
 
+    // Default constructor
+    Order() {
+        corresp = -1;
+    }
+
     // Used mainly for own testing
     Order(int64_t price, int quantity, int direction) :  price{ price }, quantity{ quantity }, direction{ direction } {
         id = order_count++;

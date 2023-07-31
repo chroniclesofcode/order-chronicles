@@ -4,7 +4,7 @@
 #include "orderbook/Timer.h"
 
 #define TIMER_ON 0
-#define IMPL "DEFAULT"
+#define IMPL "ARRAYS"
 
 int main(int argc, char **argv) {
     if (argc == 1) {
