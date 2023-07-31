@@ -13,6 +13,7 @@ DONE:
 - Pipes performance measurements into certain files
 
 TO DO:
+- Fix error in arrays implementation where certain orders are not being added
 - Measure performance of the different data implementations
 - Provide multiple runthroughs + statistics of each run
 - Create array-based orderbook (array -> doubly linked lists)
@@ -24,6 +25,7 @@ FIXES:
 - Patch bug with full cancellation not working properly when orders have been executed on it
 - Fix error where order type 4 matches improperly
 - Process LOBSTER order book data properly without fail
+- Revamp array-based orderbook due to price points being too large
 
 # How to run
 
