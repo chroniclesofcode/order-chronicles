@@ -13,10 +13,11 @@ DONE:
 - Pipes performance measurements into certain files
 - Measure performance of the different data implementations
 - Provide multiple runthroughs + statistics of each run
-- Create array-based orderbook (array -> doubly linked lists)
+- Create maplist-based orderbook (map -> doubly linked lists (custom))
 
 TO DO:
-- Optimize array-based orderbook to use it's advantages more
+- Implement Arrays-based orderbook of vectors
+- Profile hot functions in orderbook
 - Optimize parsing of orderbook
 - Heavy optimizations (at time of writing, default mean = 152ms, arrays mean = 167ms)
 - Create the orderbooks with/without STL

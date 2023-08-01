@@ -3,8 +3,8 @@
 #include "orderbook/Init.h"
 #include "orderbook/Timer.h"
 
-#define TIMER_ON 0
-#define IMPL "DEFAULT"
+#define TIMER_ON 1
+#define IMPL "MAPLIST"
 
 int main(int argc, char **argv) {
     if (argc == 1) {
