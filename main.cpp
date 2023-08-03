@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     // If there is a timer, run 10 times for more accurate statistics
     if (TIMER_ON) {
         Timer logger("../stats/results_" IMPL ".md");
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             logger.begin();
             Init(argv[1], book_file);
             logger.stop();

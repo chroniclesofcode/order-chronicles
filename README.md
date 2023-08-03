@@ -44,6 +44,11 @@ the order-chronicles folder.
 # Discussion
 
 Fastest is linear data structure, middle is the default implementation, last is maplist.
+However, the differences between these implementations are only really significant when
+large data sets are involved. Currently, our sample size of trades are small, and when
+run in release mode, the times are very negligibly similar (the same pattern holds, but
+could be due to luck). However, I still have hypotheses on why these results are the way
+they are.
 There's a lot to talk about here, but I'll keep it short and simple. 
 
 I did believe linear would be

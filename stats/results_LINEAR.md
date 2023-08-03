@@ -1,61 +1,111 @@
 **** TIMES ****
 
-158 milliseconds
-164 milliseconds
-164 milliseconds
-174 milliseconds
-180 milliseconds
-168 milliseconds
-161 milliseconds
-200 milliseconds
-152 milliseconds
-155 milliseconds
-148 milliseconds
-156 milliseconds
-145 milliseconds
-153 milliseconds
-151 milliseconds
-149 milliseconds
-140 milliseconds
-148 milliseconds
-151 milliseconds
-142 milliseconds
-144 milliseconds
-153 milliseconds
-154 milliseconds
-155 milliseconds
-151 milliseconds
-140 milliseconds
-150 milliseconds
-146 milliseconds
-152 milliseconds
-148 milliseconds
-150 milliseconds
-146 milliseconds
-143 milliseconds
-145 milliseconds
-152 milliseconds
-152 milliseconds
-150 milliseconds
-150 milliseconds
-146 milliseconds
-140 milliseconds
-143 milliseconds
-154 milliseconds
-149 milliseconds
-143 milliseconds
-149 milliseconds
-145 milliseconds
-140 milliseconds
-142 milliseconds
-154 milliseconds
-147 milliseconds
+132 milliseconds
+108 milliseconds
+103 milliseconds
+101 milliseconds
+100 milliseconds
+100 milliseconds
+101 milliseconds
+102 milliseconds
+100 milliseconds
+102 milliseconds
+102 milliseconds
+101 milliseconds
+100 milliseconds
+99 milliseconds
+100 milliseconds
+102 milliseconds
+101 milliseconds
+103 milliseconds
+100 milliseconds
+99 milliseconds
+100 milliseconds
+100 milliseconds
+100 milliseconds
+100 milliseconds
+101 milliseconds
+113 milliseconds
+102 milliseconds
+101 milliseconds
+100 milliseconds
+98 milliseconds
+101 milliseconds
+100 milliseconds
+96 milliseconds
+94 milliseconds
+96 milliseconds
+102 milliseconds
+103 milliseconds
+98 milliseconds
+96 milliseconds
+93 milliseconds
+94 milliseconds
+103 milliseconds
+98 milliseconds
+100 milliseconds
+101 milliseconds
+104 milliseconds
+101 milliseconds
+101 milliseconds
+101 milliseconds
+98 milliseconds
+96 milliseconds
+103 milliseconds
+100 milliseconds
+93 milliseconds
+97 milliseconds
+98 milliseconds
+102 milliseconds
+102 milliseconds
+100 milliseconds
+99 milliseconds
+95 milliseconds
+102 milliseconds
+100 milliseconds
+94 milliseconds
+95 milliseconds
+102 milliseconds
+102 milliseconds
+102 milliseconds
+97 milliseconds
+92 milliseconds
+96 milliseconds
+102 milliseconds
+101 milliseconds
+101 milliseconds
+97 milliseconds
+99 milliseconds
+103 milliseconds
+102 milliseconds
+103 milliseconds
+97 milliseconds
+94 milliseconds
+100 milliseconds
+101 milliseconds
+98 milliseconds
+99 milliseconds
+98 milliseconds
+102 milliseconds
+102 milliseconds
+99 milliseconds
+93 milliseconds
+100 milliseconds
+101 milliseconds
+98 milliseconds
+95 milliseconds
+96 milliseconds
+101 milliseconds
+106 milliseconds
+102 milliseconds
+98 milliseconds
+96 milliseconds
 
 **** STATISTICS ****
 
-count: 50
-average: 151.84 milliseconds
-variance: 114.734 milliseconds^2
-standard deviation: 10.7114 milliseconds
-min: 140 milliseconds
-max: 200 milliseconds
+count: 100
+average: 100.02 milliseconds
+variance: 20.7596 milliseconds^2
+standard deviation: 4.55627 milliseconds
+min: 92 milliseconds
+max: 132 milliseconds
