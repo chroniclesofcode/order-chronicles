@@ -87,7 +87,7 @@ no way to iterate through each price level without using a for loop to go down t
 one (even 50 by 50 prices are too slow). So, I decided to use an unordered map to maintain my
 goal for this implementation: O(1) price level access. I also needed a set for each price, which
 defeated the point of this implementation, because technically every function bcomes O(logn). If not,
-how else am I meant to efficient iterate through levels? A vector would be O(n) since we need it to insert
+how else am I meant to efficiently iterate through levels? A vector would be O(n) since we need it to insert
 values sorted. Anyways, it's actually pretty similar to the default implementation. I think the lack
 of speed comes mainly from the massive amount of checks I had to do, as well as the O(logn) insertion
 in the end. Also, unordered_map runs much slower than just a map for small values, despite being
