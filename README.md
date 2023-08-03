@@ -15,14 +15,13 @@ DONE:
 - Provide multiple runthroughs + statistics of each run
 - Create maplist-based orderbook (map -> doubly linked lists (custom))
 - Implement Arrays-based orderbook of vectors
+- Update README for detailed information, including tradeoffs and results
 
 TO DO:
 
 - Profile hot functions in orderbook
 - Optimize parsing of orderbook
-- Create the orderbooks with/without STL
 - Consider Van Emde Boas Tree (instead of RB) for LogLogN speed
-- Update README for detailed information, including tradeoffs and results
 
 FIXES: 
 - Patch bug with full cancellation not working properly when orders have been executed on it
