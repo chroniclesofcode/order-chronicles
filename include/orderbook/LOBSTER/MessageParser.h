@@ -83,17 +83,19 @@ public:
             } else if (ct % 4 == 1) {
                 quantity = stoi(s.substr(j, i-j));
                 Order n = Order(price, quantity, 0, start_id, 1, 0.0);
-                if (price > 0)
+                if (price > 0) {
                     orders.addOrder(n);
-                start_id++;
+                    start_id++;
+                }
             } else if (ct % 4 == 2) {
                 price = stoll(s.substr(j, i-j));
             } else if (ct % 4 == 3) {
                 quantity = stoi(s.substr(j, i-j));
                 Order n = Order(price, quantity, 1, start_id, 1, 0.0);
-                if (price > 0) 
+                if (price > 0) {
                     orders.addOrder(n);
-                start_id++;
+                    start_id++;
+                }
             }
             ct++;
         }
