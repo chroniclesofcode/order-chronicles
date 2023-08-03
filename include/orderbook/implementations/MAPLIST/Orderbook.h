@@ -177,10 +177,14 @@ public:
         Entry_t &e = orders[orderid];
         Order &o = e.o;
         //orders.erase(orderid);
+<<<<<<< HEAD
         if (o.id != orderid) {
             std::cout << "broken\n";
             exit(1);
         }
+=======
+
+>>>>>>> 8e959f27dd51cc7bfe3a7005d034a10f81d72e75
         if (o.direction) {
             bid_vol[o.price] -= o.quantity;
             bid_tot -= o.quantity;
