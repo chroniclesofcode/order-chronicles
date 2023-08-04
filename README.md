@@ -57,8 +57,7 @@ for the compiler/cpu to optimize for. Our data structure is a linked list of pri
 for the orders. Iterating through the orders is very efficient, and I suspect the speed difference
 would be even more pronounced in a tight orderbook where price levels have many orders within them.
 The inefficiences mostly come from the linked list of price levels - since these levels change so
-often, I have to do many removals of linkedlists/sets etc, which definitely is the bottleneck.
-I could use a vector for the price levels, but this would probably be another entirely different
+often, I have to do many removals of linkedlists/sets etc, which definitely is the bottleneck. I won't go in depth on why linked lists are slow, but mainly due to your memory structure, cache misses, instruction level parallelism, heap allocation etc. I could use a vector for the price levels, but this would probably be another entirely different
 implementation since I would need to change all the data structures drastically. Also, since the
 price levels change so much, there could possibly be a lot of O(n) price level restructures, since
 we have to shift everything around + a lot of different storage changes. A note about this implementation
@@ -96,4 +95,6 @@ values sorted. Anyways, it's actually pretty similar to the default implementati
 of speed comes mainly from the massive amount of checks I had to do, as well as the O(logn) insertion
 in the end. Also, unordered_map runs much slower than just a map for small values, despite being
 average O(1) compared to guaranteed O(logn). So this result is not very surprising.
+
+There are many more implementations that are feasible, plenty of research papers discussing efficient implementations of an orderbook. I am currently most interested in making an array of arrays - I believe that will actually be the fastest. If not arrays of arrays, I am very curious about a solution that is similar to the linear orderbook, but the linked list is replaced with an efficient linked list. This means high instruction level parallelism and ideal memory structure for a high % of cache hits / data prefetching.
 
